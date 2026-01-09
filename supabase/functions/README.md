@@ -79,3 +79,61 @@ Requires `home_pairings` table (see migrations).
 
 **Database:**
 Requires `home_pairings` table (see migrations).
+
+## chat
+
+**Endpoint:** `POST /functions/v1/chat`
+
+**Purpose:** AI chat interface with MCP-based backend tool routing for home automation assistance.
+
+**Authentication:** Required (JWT in Authorization header)
+
+**Request Body:**
+```json
+{
+  "home_id": "uuid-string",
+  "locale": "de-DE",
+  "messages": [
+    { "role": "user", "content": "What is the temperature?" },
+    { "role": "assistant", "content": "The temperature is 21°C" },
+    { "role": "user", "content": "Thank you" }
+  ]
+}
+```
+
+**Success Response:**
+```json
+{
+  "reply": "Understood. How can I help you further?",
+  "tool_events": [
+    {
+      "tool": "mcp_get_sensor_data",
+      "status": "success"
+    }
+  ]
+}
+```
+
+**Notes:**
+- `tool_events` field is optional and only included when tools are executed
+- MVP implementation uses stub tool routing
+- Streaming not implemented in MVP
+
+**Error Responses:**
+- `401 Unauthorized` - Missing or invalid authentication
+- `403 Forbidden` - User lacks access to home
+- `422 Unprocessable Entity` - Home not paired to user or invalid input
+- `429 Too Many Requests` - Free-tier message limit exceeded (50 messages/day)
+- `500 Internal Server Error` - Server configuration or unexpected errors
+
+**Rate Limiting:**
+- Free-tier: 50 messages per day per user
+- Enforced server-side with automatic counter tracking
+
+**Security:**
+- Verifies home belongs to authenticated user
+- Validates pairing before processing messages
+- Row Level Security (RLS) ensures proper access control
+
+**Database:**
+Requires `home_pairings` and `chat_usage` tables (see migrations).
