@@ -22,3 +22,10 @@ Chat-first iOS application for smart building operations.
 
 ## Status
 - Sprint 0: Backend contracts + Chat-only app
+
+## Documentation
+- **[API Documentation](docs/API.md)** - Complete API reference for all edge functions
+- **[Privacy Policy](docs/PRIVACY.md)** - Privacy and data handling (EN + DE)
+- **[iOS App README](ios/README.md)** - iOS app setup and architecture
+
+## Project by Exafion

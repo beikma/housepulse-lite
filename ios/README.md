@@ -47,6 +47,17 @@ Native iOS application for HousePulse Lite smart home assistant.
   - Upgrade hint displayed when limit reached (HTTP 429)
 - **Read-Only Badge**: Indicates current MVP limitations
 - **Usage Counter**: Shows messages used today (e.g., "15/50 heute")
+- **Privacy View**: Accessible via info button in toolbar
+  - Displays privacy policy in German and English
+  - Shows data processing information
+  - Explains MCP API key security
+
+#### Privacy & Data
+- **In-App Privacy Screen**: Bilingual privacy policy accessible from chat toolbar
+- **No Tracking**: No analytics, ads, or data selling
+- **Secure Storage**: MCP API keys stored in iOS Keychain, hashed (SHA-256) server-side
+- **Data Minimization**: Only essential data processed (auth, home_id, messages, usage counters)
+- **Full Transparency**: See [docs/PRIVACY.md](../docs/PRIVACY.md) for complete policy
 
 ## Setup Instructions
 
@@ -107,6 +118,7 @@ ios/HousePulseLite/HousePulseLite/
     ├── OnboardingFlowView.swift  # Onboarding wizard
     ├── ChatView.swift            # Main chat interface
     ├── MessageBubbleView.swift   # Message bubbles & typing indicator
+    ├── PrivacyView.swift         # Privacy & data policy screen
     └── MainAppView.swift         # Legacy success screen
 ```
 

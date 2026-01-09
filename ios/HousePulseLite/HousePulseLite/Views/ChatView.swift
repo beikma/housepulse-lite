@@ -4,6 +4,7 @@ struct ChatView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
     @StateObject var chatViewModel: ChatViewModel
     @State private var showQuickActions = true
+    @State private var showPrivacy = false
 
     init(homeId: String) {
         _chatViewModel = StateObject(wrappedValue: ChatViewModel(homeId: homeId))
@@ -90,17 +91,29 @@ struct ChatView: View {
                 }
 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Text(chatViewModel.usageText)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color(.systemGray6))
-                        .cornerRadius(8)
+                    HStack(spacing: 12) {
+                        Text(chatViewModel.usageText)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(8)
+
+                        Button(action: {
+                            showPrivacy = true
+                        }) {
+                            Image(systemName: "info.circle")
+                                .foregroundColor(.blue)
+                        }
+                    }
                 }
             }
         }
         .animation(.default, value: showQuickActions)
+        .sheet(isPresented: $showPrivacy) {
+            PrivacyView()
+        }
     }
 
     private func scrollToBottom(proxy: ScrollViewProxy) {
