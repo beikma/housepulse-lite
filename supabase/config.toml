@@ -1,0 +1,14 @@
+# Supabase Configuration
+
+[project]
+name = "housepulse-lite"
+
+[api]
+enabled = true
+port = 54321
+
+[db]
+port = 54322
+
+[functions]
+enabled = true
