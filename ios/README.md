@@ -30,7 +30,23 @@ Native iOS application for HousePulse Lite smart home assistant.
 4. **Keychain Storage**: API key stored securely in iOS Keychain
 5. **Pair Home**: Calls `/functions/v1/pair_home` edge function
 6. **System Check**: Calls `/functions/v1/system_check` to verify pairing
-7. **Success**: User gains access to main app
+7. **Success**: User gains access to chat interface
+
+#### Chat Interface
+- **Messenger-style Bubbles**: User messages (blue, right-aligned) vs assistant messages (gray, left-aligned)
+- **Quick Action Chips**: Four German-labeled quick actions:
+  - „Status-Check" - System status inquiry
+  - „Risiken / Wartung" - Risks and maintenance check
+  - „Energie sparen" - Energy saving tips
+  - „ESCO-Compliance prüfen" - ESCO compliance verification
+- **Typing Indicator**: Animated dots while waiting for assistant response
+- **Tool Events**: Display of backend tool executions (e.g., sensor data retrieval)
+- **Rate Limiting**:
+  - Client-side counter displays usage (UX only)
+  - Server enforces 50 messages/day limit
+  - Upgrade hint displayed when limit reached (HTTP 429)
+- **Read-Only Badge**: Indicates current MVP limitations
+- **Usage Counter**: Shows messages used today (e.g., "15/50 heute")
 
 ## Setup Instructions
 
@@ -76,18 +92,22 @@ ios/HousePulseLite/HousePulseLite/
 ├── Models/
 │   ├── Home.swift                # Home data model
 │   ├── User.swift                # User data model
+│   ├── ChatMessage.swift         # Chat message & tool event models
 │   └── APIModels.swift           # API request/response models
 ├── Services/
 │   ├── KeychainService.swift     # Secure storage for API keys
 │   └── SupabaseService.swift     # Supabase client & API calls
 ├── ViewModels/
 │   ├── AuthViewModel.swift       # Authentication logic
-│   └── OnboardingViewModel.swift # Onboarding flow logic
+│   ├── OnboardingViewModel.swift # Onboarding flow logic
+│   └── ChatViewModel.swift       # Chat state & message handling
 └── Views/
     ├── RootView.swift            # Root navigation
     ├── SignInView.swift          # Authentication screen
     ├── OnboardingFlowView.swift  # Onboarding wizard
-    └── MainAppView.swift         # Main app (post-pairing)
+    ├── ChatView.swift            # Main chat interface
+    ├── MessageBubbleView.swift   # Message bubbles & typing indicator
+    └── MainAppView.swift         # Legacy success screen
 ```
 
 ## Security Features
@@ -137,6 +157,29 @@ Response:
   "notes": ["Pairing reference validated", "..."]
 }
 ```
+
+#### POST /functions/v1/chat
+```json
+Request:
+{
+  "home_id": "uuid",
+  "locale": "de-DE",
+  "messages": [
+    { "role": "user", "content": "What is the temperature?" },
+    { "role": "assistant", "content": "The temperature is 21°C" }
+  ]
+}
+
+Response:
+{
+  "reply": "I retrieved the sensor data. Current temperature is 21°C.",
+  "tool_events": [
+    { "tool": "mcp_get_sensor_data", "status": "success" }
+  ]
+}
+```
+
+**Note**: `tool_events` is optional and only included when tools are executed. Rate limit exceeded returns HTTP 429.
 
 ## Error Handling
 

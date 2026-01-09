@@ -7,8 +7,9 @@ struct RootView: View {
     var body: some View {
         Group {
             if authViewModel.isAuthenticated {
-                if onboardingViewModel.isPaired {
-                    MainAppView()
+                if onboardingViewModel.isPaired,
+                   let selectedHome = onboardingViewModel.selectedHome {
+                    ChatView(homeId: selectedHome.id.uuidString)
                         .environmentObject(onboardingViewModel)
                 } else {
                     OnboardingFlowView()

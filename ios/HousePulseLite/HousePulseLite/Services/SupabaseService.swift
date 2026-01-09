@@ -133,6 +133,42 @@ class SupabaseService {
             throw SupabaseError.apiError(error?.error ?? "Unknown error")
         }
     }
+
+    func chat(homeId: String, locale: String, messages: [ChatMessage]) async throws -> ChatResponse {
+        guard let token = accessToken else {
+            throw SupabaseError.notAuthenticated
+        }
+
+        let endpoint = "\(SupabaseConfig.functionsURL)/chat"
+        var request = URLRequest(url: URL(string: endpoint)!)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue(anonKey, forHTTPHeaderField: "apikey")
+
+        // Convert ChatMessage to API payload format
+        let messagePayloads = messages.map { msg in
+            ChatRequest.MessagePayload(role: msg.role, content: msg.content)
+        }
+
+        let body = ChatRequest(homeId: homeId, locale: locale, messages: messagePayloads)
+        request.httpBody = try JSONEncoder().encode(body)
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw SupabaseError.networkError
+        }
+
+        if httpResponse.statusCode == 200 {
+            return try JSONDecoder().decode(ChatResponse.self, from: data)
+        } else if httpResponse.statusCode == 429 {
+            throw SupabaseError.rateLimitExceeded
+        } else {
+            let error = try? JSONDecoder().decode(APIError.self, from: data)
+            throw SupabaseError.apiError(error?.error ?? "Unknown error")
+        }
+    }
 }
 
 // MARK: - Supporting Types
@@ -152,6 +188,7 @@ enum SupabaseError: LocalizedError {
     case notAuthenticated
     case networkError
     case apiError(String)
+    case rateLimitExceeded
 
     var errorDescription: String? {
         switch self {
@@ -163,6 +200,8 @@ enum SupabaseError: LocalizedError {
             return "Network error. Please check your connection."
         case .apiError(let message):
             return message
+        case .rateLimitExceeded:
+            return "Free-tier message limit exceeded"
         }
     }
 }
